@@ -119,14 +119,16 @@ class IncludePreprocessor(Preprocessor):
                         else:
                             text[i] = text[i].rstrip()
 
+                    prolog = m.string[0:m.start()]
+                    epilog = m.string[m.end():]
                     indent = m.group('indent')
                     if indent == '>':
-                        text = text[0:1] + [' ' * len(line_split[0]) + l for l in text[1:]]
+                        text = text[0:1] + [' ' * len(prolog) + l for l in text[1:]]
                     elif indent == '=':
-                        text = text[0:1] + [line_split[0] + l for l in text[1:]]
+                        text = text[0:1] + [prolog + l for l in text[1:]]
 
-                    text[0] = line_split[0] + text[0]
-                    text[-1] = text[-1] + line_split[2]
+                    text[0] = prolog + text[0]
+                    text[-1] = text[-1] + epilog
                     lines = lines[:loc] + text + lines[loc+1:]
                     break
 
