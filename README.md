@@ -17,7 +17,7 @@ This module can be used in a program in the following way:
 
 ```python
 import markdown
-html = markdown.markdown(source, extensions=['markdown_include.include'])
+html = markdown.markdown(source, extensions=['markdown_include'])
 ```
 
 The syntax for use within your Markdown files is ``{!filename!}``. This
@@ -56,7 +56,7 @@ The following settings can be specified when initialising the plugin.
 An example of setting the base path and file encoding is given below:
 ```python
 import markdown
-from markdown_include.include import MarkdownInclude
+from markdown_include import MarkdownInclude
 
 # Markdown Extensions
 markdown_include = MarkdownInclude(
@@ -89,7 +89,7 @@ End of included content.
 Then running the script
 ```python
 import markdown
-from markdown_include.include import MarkdownInclude
+from markdown_include import MarkdownInclude
 
 # Markdown Extensions
 markdown_include = MarkdownInclude(
