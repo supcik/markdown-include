@@ -29,27 +29,27 @@ from codecs import open
 from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
 
-INC_SYNTAX = re.compile(r'\{!\s*(.+?)\s*!\}')
+INC_SYNTAX = re.compile(r'\{!\s*(?P<filename>.+?)\s*!(?P<indent>[=>])\}')
 HEADING_SYNTAX = re.compile( '^#+' )
 
 
 class MarkdownInclude(Extension):
     def __init__(self, configs={}):
         self.config = {
-            'base_path': ['.', 'Default location from which to evaluate ' \
+            'base_path': ['.', 'Default location from which to evaluate '
                 'relative paths for the include statement.'],
-            'encoding': ['utf-8', 'Encoding of the files used by the include ' \
+            'encoding': ['utf-8', 'Encoding of the files used by the include '
                 'statement.'],
-            'inheritHeadingDepth': [False, 'Increases headings on included ' \
-                'file by amount of previous heading (combines with '\
+            'inheritHeadingDepth': [False, 'Increases headings on included '
+                'file by amount of previous heading (combines with '
                 'headingOffset option).'],
-            'headingOffset': [0, 'Increases heading depth by a specific ' \
+            'headingOffset': [0, 'Increases heading depth by a specific '
                 'amount (and the inheritHeadingDepth option).  Defaults to 0.'],
-            'throwException': [False, 'When true, if the extension is unable '\
-                                'to find an included file it will throw an '\
-                                'exception which the user can catch. If false '\
-                                '(default), a warning will be printed and '\
-                                'Markdown will continue parsing the file.']
+            'throwException': [False, 'When true, if the extension is unable '
+                                'to find an included file it will throw an '
+                                'exception which the user can catch. If false '
+                                '(default), a warning will be printed and '
+                                'Markdown will continue parsing the file.'],
         }
         for key, value in configs.items():
             self.setConfig(key, value)
@@ -76,6 +76,13 @@ class IncludePreprocessor(Preprocessor):
         self.inheritHeadingDepth = config['inheritHeadingDepth']
         self.headingOffset = config['headingOffset']
         self.throwException = config['throwException']
+        indent = config['indent']
+        if isinstance(indent, int) and indent > 0:
+            self.indent = ' ' * indent
+        elif isinstance(indent, str) and indent != '':
+            self.indent = indent
+        else:
+            self.indent = ''
 
     def run(self, lines):
         done = False
@@ -85,7 +92,7 @@ class IncludePreprocessor(Preprocessor):
                 m = INC_SYNTAX.search(line)
 
                 if m:
-                    filename = m.group(1)
+                    filename = m.group('filename')
                     filename = os.path.expanduser(filename)
                     if not os.path.isabs(filename):
                         filename = os.path.normpath(
@@ -111,25 +118,31 @@ class IncludePreprocessor(Preprocessor):
                         # Strip the newline, and optionally increase header depth
                         if self.inheritHeadingDepth or self.headingOffset:
                             if HEADING_SYNTAX.search(text[i]):
-                                text[i] = text[i][0:-1]
+                                text[i] = text[i].rstrip()
                                 if self.inheritHeadingDepth:
                                     text[i] = bonusHeading + text[i]
                                 if self.headingOffset:
                                     text[i] = '#' * self.headingOffset + text[i]
                         else:
-                            text[i] = text[i][0:-1]
-                            
+                            text[i] = text[i].rstrip()
+
+                    indent = m.group('indent')
+                    if indent == '>':
+                        text = text[0] + [' ' * len(line_split[0]) + l for l in text[1:]]
+                    elif indent == '=':
+                        text = text[0] + [line_split[0] + l for l in text[1:]]
+
                     text[0] = line_split[0] + text[0]
                     text[-1] = text[-1] + line_split[2]
                     lines = lines[:loc] + text + lines[loc+1:]
                     break
-                    
+
                 else:
                     h = HEADING_SYNTAX.search(line)
                     if h:
                         headingDepth = len(h.group(0))
                         bonusHeading = '#' * headingDepth
-                
+
             else:
                 done = True
         return lines
