@@ -76,13 +76,6 @@ class IncludePreprocessor(Preprocessor):
         self.inheritHeadingDepth = config['inheritHeadingDepth']
         self.headingOffset = config['headingOffset']
         self.throwException = config['throwException']
-        indent = config['indent']
-        if isinstance(indent, int) and indent > 0:
-            self.indent = ' ' * indent
-        elif isinstance(indent, str) and indent != '':
-            self.indent = indent
-        else:
-            self.indent = ''
 
     def run(self, lines):
         done = False
