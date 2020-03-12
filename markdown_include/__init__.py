@@ -121,9 +121,9 @@ class IncludePreprocessor(Preprocessor):
 
                     indent = m.group('indent')
                     if indent == '>':
-                        text = text[0] + [' ' * len(line_split[0]) + l for l in text[1:]]
+                        text = text[0:1] + [' ' * len(line_split[0]) + l for l in text[1:]]
                     elif indent == '=':
-                        text = text[0] + [line_split[0] + l for l in text[1:]]
+                        text = text[0:1] + [line_split[0] + l for l in text[1:]]
 
                     text[0] = line_split[0] + text[0]
                     text[-1] = text[-1] + line_split[2]
